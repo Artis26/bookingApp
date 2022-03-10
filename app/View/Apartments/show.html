@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <h1>All Apartments: </h1>
+</head>
+<body>
+<ul>
+    {% for apartment in apartments %}
+    <a href="/apartment/{{ apartment.id }}">
+        <b>{{ apartment.name }}</b> <br> </a>
+        Adress: {{ apartment.address }} <br>
+        Average rating: {{ ratings[apartment.id][0] }} <br>
+        Price: <b>{{ apartment.price }}$</b>
+        <form method="get" action="/apartment/{{ apartment.id }}">
+            <button type="submit" class="classicButton">Reserve</button>
+        </form>
+        <br>
+    {% endfor %}
+</ul>
+</body>
+</html>
+{% endblock %}

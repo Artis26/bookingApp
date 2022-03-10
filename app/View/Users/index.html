@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>{{ user.name }}  {{ user.surname }}</h1>
+Birthday: {{ user.birthday }}
+
+<h1>Current reservations:</h1>
+{% for reservation in reservations %}
+<li>
+    <a href="/apartment/{{ reservation.apartment_id }}">
+        Apartment name: {{ reservation.name }} <br> </a>
+        From {{ reservation.reserved_from  }} To {{ reservation.reserved_till }} <br>
+        Total cost: <b> {{ reservation.total_price }}$ </b>
+    <form method="post" action="/apartment/delete/{{ reservation.id }}">
+        <button type="submit" class="classicButton" style="background-color: deeppink">Remove reservation</button>
+    </form>
+</li>
+{% endfor %}
+{% endblock %}

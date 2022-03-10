@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <ul>
+        {% for error in session.errors %}
+        <li> {{ error }} </li>
+        {% endfor %}
+    </ul>
+</head>
+<body>
+        <b>{{ apartment.name }}</b> <br>
+    Address: {{ apartment.address }} <br>
+    Description: {{ apartment.description }} <br>
+    Rating: {{ rating }} <br>
+    Price per night: <b> {{ apartment.price }}$ </b> <br>
+    <form method="post" action="/apartment/{{ apartment.id }}/reserve">
+        <div>
+            <label for="reserve_from">ReserveFrom</label>
+            <div id="datepicker" >
+                <input type="text" class="datepicker" id="reserve_from" name="reserve_from"/>
+                </div>
+        </div>
+        <div>
+            <label for="reserve_till">ReserveTill</label>
+            <div id="datepicker">
+                <input type="text" class="datepicker" id="reserve_till" name="reserve_till"/>
+                </div>
+        </div>
+        <button type="submit" class="classicButton">Reserve</button>
+    </form>
+    <br>
+        <form method="post" action="/apartment/{{ apartment.id }}/review">
+            <div style="border:3px; border-style:solid; border-color:#FF0000; padding: 1em;">
+                <h1 style="font-size: 20px"> Add review: </h1>
+                <div>
+                    <label for="rating">Rating:
+                        <input type="number" id="rating" name="rating" min="1" max="10" required/> [1-10]</label>
+                </div>
+                <div>
+                    <label for="text">Comment: </label>
+                    <br>
+                    <textarea id="text" name="text" required></textarea>
+                </div>
+                <button type="submit" class="classicButton">Post Review</button>
+            </div>
+        </form>
+        <br>
+    {% for review in reviews %}
+ <ul>
+     <li>
+         Rating: {{ review.rating }} || {{ review.text }} || Author: {{ review.userName }} || Time: {{ review.createdAt }}
+         {% if session.user_id == review.userID %}
+         <form method="post" action="/apartment/{{ apartment.id }}/review/{{ review.id }}/delete">
+             <button type="submit" class="smallButton" onclick="return confirm('Are you sure?');">X</button>
+             <button class="smallButton" onclick="location.href='/apartment/{{ apartment.id }}/review/{{ review.id }}/edit'" type="button" > Edit </button>
+         </form>
+         {% endif %}
+     </li>
+ </ul>
+    {% endfor %}
+</body>
+</html>
+{% endblock %}
+{% block scripts %}
+<script>
+    dates = {{ disabledDates|json_encode()|raw }}
+    $('.datepicker').datepicker({
+        format:  "yyyy-mm-dd",
+        'datesDisabled': dates
+    })
+</script>
+{% endblock %}

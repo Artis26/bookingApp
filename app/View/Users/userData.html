@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post" action="/user_data/{{ session.user_id }}">
+    <div>
+        <div>
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name"/>
+        </div>
+        <div>
+            <label for="surname">Surname</label>
+            <input type="text" id="surname" name="surname"/>
+        </div>
+
+        <div>
+            <label for="birthday">Birthday</label>
+            <input type="date" id="birthday" name="birthday"/>
+        </div>
+
+        <div>
+            <button type="submit">Save</button>
+        </div>
+    </div>
+</form>
+</body>
+</html>
+{% endblock %}
