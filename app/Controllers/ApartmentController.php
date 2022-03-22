@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controllers;
+
 use App\Database;
 use App\Models\Apartment;
 use App\Models\ApartmentReview;
@@ -47,14 +48,14 @@ class ApartmentController {
             $ratings[] = $row['rating'];
         }
 
-        $ratingAvg = array_sum($ratings)/count($ratings);
+        $ratingAvg = array_sum($ratings) / count($ratings);
 
         $query = Database::connection()->prepare('SELECT  reserved_from, reserved_till FROM apartment_reservations
         WHERE apartment_id = ? ORDER BY reserved_from ASC');
-            $query->execute([$vars['id']]);
-            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-                $reservations[] = $row;
-            }
+        $query->execute([$vars['id']]);
+        while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $reservations[] = $row;
+        }
 
         $dates = [];
         foreach ($reservations as $one) {
@@ -96,7 +97,7 @@ class ApartmentController {
             while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
                 $ratings[$o][] = $row['rating'];
             }
-            $ratingsAvg[$o][] = array_sum($ratings[$o])/count($ratings[$o]);
+            $ratingsAvg[$o][] = array_sum($ratings[$o]) / count($ratings[$o]);
         }
 
         return new View('Apartments/show.html', [
@@ -106,6 +107,9 @@ class ApartmentController {
     }
 
     public function create(): View {
+        if ($_SESSION['user_id'] == "") {
+            return new View('Users/login.html');
+        }
         return new View('Apartments/create.html');
     }
 
@@ -125,40 +129,45 @@ class ApartmentController {
     }
 
     public function reserve(array $vars): Redirect {
-            $apartmentID = $vars['id'];
-            $userID = $_SESSION['user_id'];
-            $reserveFrom = $_POST['reserve_from'];
-            $reserveTill = $_POST['reserve_till'];
 
-            $check = Database::connection()->prepare('SELECT * FROM apartment_reservations WHERE reserved_from BETWEEN ? AND ? 
+        if ($_SESSION['user_id'] == "") {
+            return new Redirect('/user/login');
+        }
+
+        $apartmentID = $vars['id'];
+        $userID = $_SESSION['user_id'];
+        $reserveFrom = $_POST['reserve_from'];
+        $reserveTill = $_POST['reserve_till'];
+
+        $check = Database::connection()->prepare('SELECT * FROM apartment_reservations WHERE reserved_from BETWEEN ? AND ? 
         && apartment_id = ?');
-            $check->execute([$reserveFrom, $reserveTill, $apartmentID]);
-            while ($row = $check->fetch(PDO::FETCH_ASSOC)) {
-                $res[] = $row;
-            }
+        $check->execute([$reserveFrom, $reserveTill, $apartmentID]);
+        while ($row = $check->fetch(PDO::FETCH_ASSOC)) {
+            $res[] = $row;
+        }
 
-            if (!empty($res)) {
-                $_SESSION['errors'][] = "Apartment already reserved during this [$reserveFrom to $reserveTill] time period. ";
-                return new Redirect('/apartment/' . $apartmentID);
-            }
-
-            $period = CarbonPeriod::create($reserveFrom, $reserveTill);
-            foreach ($period as $date) {
-                $dates[] = $date->format('Y-m-d');
-            }
-
-            $check = Database::connection()->prepare('SELECT price FROM apartments WHERE id = ? ');
-            $check->execute([$apartmentID]);
-            while ($row = $check->fetch(PDO::FETCH_ASSOC)) {
-                $price = $row['price'];
-            }
-            $totalPrice = (count($dates)-1) * $price;
-
-            $new = Database::connection()->prepare('INSERT INTO apartment_reservations (apartment_id, reserver_id, reserved_from,
-                          reserved_till, total_price) VALUES (?, ? ,? ,?, ?)');
-            $new->execute([$apartmentID, $userID, $reserveFrom, $reserveTill, $totalPrice]);
-
+        if (!empty($res)) {
+            $_SESSION['errors'][] = "Apartment already reserved during this [$reserveFrom to $reserveTill] time period. ";
             return new Redirect('/apartment/' . $apartmentID);
+        }
+
+        $period = CarbonPeriod::create($reserveFrom, $reserveTill);
+        foreach ($period as $date) {
+            $dates[] = $date->format('Y-m-d');
+        }
+
+        $check = Database::connection()->prepare('SELECT price FROM apartments WHERE id = ? ');
+        $check->execute([$apartmentID]);
+        while ($row = $check->fetch(PDO::FETCH_ASSOC)) {
+            $price = $row['price'];
+        }
+        $totalPrice = (count($dates) - 1) * $price;
+
+        $new = Database::connection()->prepare('INSERT INTO apartment_reservations (apartment_id, reserver_id, reserved_from,
+                          reserved_till, total_price) VALUES (?, ? ,? ,?, ?)');
+        $new->execute([$apartmentID, $userID, $reserveFrom, $reserveTill, $totalPrice]);
+
+        return new Redirect('/apartment/' . $apartmentID);
     }
 
     public function remove($vars): Redirect {

@@ -11,6 +11,11 @@ use PDO;
 class ApartmentReviewController {
 
     public function store(array $vars): Redirect {
+
+        if ($_SESSION['user_id'] == "") {
+            return new Redirect('/user/login');
+        }
+
         $apartmentID = $vars['id'];
         $userID = $_SESSION['user_id'];
         $userName = $_SESSION['user_name'];

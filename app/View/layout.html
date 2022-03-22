@@ -17,7 +17,11 @@
                     {% endif %}</b>
             </a>
             <a class="active" href="/">Home</a>
+            {% if session.user_id == true %}
             <a href="/user/{{ session.user_id }}">MyProfile</a>
+            {% else %}
+            <a href="/user/login">MyProfile</a>
+            {% endif %}
             <a href="#about">{% if session.user_name != null %}
                 <form method="post" action="/user/logout" style="text-align: right">
                     <button type="submit">Logout</button>

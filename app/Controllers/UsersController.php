@@ -11,7 +11,6 @@ use PDO;
 class UsersController {
 
         public function index(): View {
-
             $new = Database::connection()->prepare('SELECT * FROM user_profiles WHERE user_id = ?');
             $new->execute([$_SESSION['user_id']]);
 
