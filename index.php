@@ -34,7 +34,12 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('POST', '/apartment/{id:\d+}/reserve', [ApartmentController::class, 'reserve']);
 
-    $r->addRoute('POST', '/apartment/delete/{reservation_id:\d+}', [ApartmentController::class, 'delete']);
+    $r->addRoute('POST', '/apartment/delete/{reservation_id:\d+}', [ApartmentController::class, 'remove']);
+
+    $r->addRoute('POST', '/apartment/delete_apart/{id:\d+}', [ApartmentController::class, 'deleteApart']);
+
+    $r->addRoute('GET', '/apartment/{id:\d+}/edit', [ApartmentController::class, 'edit']);
+    $r->addRoute('POST', '/apartment/{id:\d+}/update', [ApartmentController::class, 'update']);
 
     //review
     $r->addRoute('POST', '/apartment/{id:\d+}/review', [ApartmentReviewController::class, 'store']);

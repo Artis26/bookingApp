@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 use App\Database;
+use App\Models\Apartment;
 use App\Models\UserProfile;
 use App\Redirect;
 use App\View;
@@ -31,9 +32,25 @@ FROM apartment_reservations JOIN apartments ON (apartment_id = apartments.id) WH
                     $reservations[] = $row;
             }
 
+            $new = Database::connection()->prepare('SELECT * FROM apartments WHERE creator_id = ?');
+            $new->execute([$_SESSION['user_id']]);
+
+            while ($row = $new->fetch(PDO::FETCH_ASSOC)) {
+                $creations[] = new Apartment(
+                        $row['address'],
+                        $row['name'],
+                        $row['description'],
+                        $row['available_from'],
+                        $row['price'],
+                        $row['creator_id'],
+                        $row['id']
+                    );
+            }
+
             return new View('Users/index.html', [
                 'user' => $user,
-                'reservations' => $reservations
+                'reservations' => $reservations,
+                'creations' => $creations
             ]);
         }
 

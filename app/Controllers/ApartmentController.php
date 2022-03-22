@@ -21,8 +21,8 @@ class ApartmentController {
                 $row['name'],
                 $row['description'],
                 $row['available_from'],
-                $row['available_till'],
                 $row['price'],
+                $row['creator_id'],
                 $row['id']
             );
         }
@@ -83,8 +83,8 @@ class ApartmentController {
                 $row['name'],
                 $row['description'],
                 $row['available_from'],
-                $row['available_till'],
                 $row['price'],
+                $row['creator_id'],
                 $row['id']
             );
         }
@@ -114,12 +114,14 @@ class ApartmentController {
         $name = $_POST['name'];
         $desc = $_POST['description'];
         $availableFrom = $_POST['available_from'];
-        $availableTill = $_POST['available_till'];
-        $new = Database::connection()->prepare('INSERT INTO apartments (address, name, description, available_from,
-                        available_till) VALUES (?, ? ,? ,? ,?)');
-        $new->execute([$address, $name, $desc, $availableFrom, $availableTill]);
+        $price = $_POST['price'];
+        $creatorID = $_SESSION['user_id'];
 
-        return new Redirect('/apartment/create');
+        $new = Database::connection()->prepare('INSERT INTO apartments (address, name, description, available_from,
+                        price, creator_id) VALUES (?, ? ,? ,?, ?, ?)');
+        $new->execute([$address, $name, $desc, $availableFrom, $price, $creatorID]);
+
+        return new Redirect('/apartments');
     }
 
     public function reserve(array $vars): Redirect {
@@ -159,10 +161,47 @@ class ApartmentController {
             return new Redirect('/apartment/' . $apartmentID);
     }
 
-    public function delete($vars): Redirect {
+    public function remove($vars): Redirect {
         $new = Database::connection()->prepare('DELETE FROM apartment_reservations WHERE id = ?');
         $new->execute([$vars['reservation_id']]);
 
         return new Redirect('/user/' . $_SESSION['user_id']);
+    }
+
+    public function deleteApart($vars): Redirect {
+        $new = Database::connection()->prepare('DELETE FROM apartments WHERE id = ?');
+        $new->execute([$vars['id']]);
+
+        return new Redirect('/user/' . $_SESSION['user_id']);
+    }
+
+    public function edit($vars): View {
+        $new = Database::connection()->prepare('SELECT * FROM apartments WHERE id = ?');
+        $new->execute([$vars['id']]);
+
+        while ($row = $new->fetch(PDO::FETCH_ASSOC)) {
+            $apartmentInfo = new Apartment(
+                $row['address'],
+                $row['name'],
+                $row['description'],
+                $row['available_from'],
+                $row['price'],
+                $row['creator_id'],
+                $row['id']
+            );
+        }
+
+        return new View("Apartments/edit.html", [
+            'apartmentInfo' => $apartmentInfo
+        ]);
+    }
+
+    public function update($vars): Redirect {
+        $new = Database::connection()->prepare('UPDATE apartments SET address = ?, name = ?, description = ?, 
+                      price = ? WHERE id = ?');
+        $id = $vars["id"];
+        $new->execute([$_POST['address'], $_POST['name'], $_POST['description'], $_POST['price'], $id]);
+
+        return new Redirect('/user' . '/' . $_SESSION['user_id']);
     }
 }

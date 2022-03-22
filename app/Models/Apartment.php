@@ -6,18 +6,18 @@ class Apartment {
     private string $name;
     private string $description;
     private string $availableFrom;
-    private ?string $availableTill;
     private float $price;
     private ?int $id;
+    private int $creatorID;
 
     public function __construct(string  $address, string $name, string $description, string $availableFrom,
-                                ?string $availableTill, float $price, ?int $id = null) {
+                                float $price,int $creatorID, ?int $id = null) {
         $this->address = $address;
         $this->name = $name;
         $this->description = $description;
         $this->availableFrom = $availableFrom;
-        $this->availableTill = $availableTill;
         $this->price = $price;
+        $this->creatorID = $creatorID;
         $this->id = $id;
     }
 
@@ -37,15 +37,15 @@ class Apartment {
         return $this->availableFrom;
     }
 
-    public function getAvailableTill(): string {
-        return $this->availableTill;
-    }
-
     public function getPrice(): float {
         return $this->price;
     }
 
-    public function getID(): int {
+    public function getCreatorID(): int {
+        return $this->creatorID;
+    }
+
+    public function getID(): ?int {
         return $this->id;
     }
 }

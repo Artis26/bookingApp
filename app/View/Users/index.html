@@ -3,16 +3,39 @@
 <h1>{{ user.name }}  {{ user.surname }}</h1>
 Birthday: {{ user.birthday }}
 
-<h1>Current reservations:</h1>
-{% for reservation in reservations %}
-<li>
-    <a href="/apartment/{{ reservation.apartment_id }}">
-        Apartment name: {{ reservation.name }} <br> </a>
-        From {{ reservation.reserved_from  }} To {{ reservation.reserved_till }} <br>
-        Total cost: <b> {{ reservation.total_price }}$ </b>
-    <form method="post" action="/apartment/delete/{{ reservation.id }}">
-        <button type="submit" class="classicButton" style="background-color: deeppink">Remove reservation</button>
-    </form>
-</li>
-{% endfor %}
+<div>
+    <h1>Current reservations:</h1>
+    <div class="side">
+        {% for reservation in reservations %}
+        <ul>
+            <a href="/apartment/{{ reservation.apartment_id }}">
+                Apartment name: {{ reservation.name }} <br> </a>
+            From {{ reservation.reserved_from  }} To {{ reservation.reserved_till }} <br>
+            Total cost: <b> {{ reservation.total_price }}$ </b>
+            <form method="post" action="/apartment/delete/{{ reservation.id }}">
+                <button type="submit" class="classicButton" style="background-color: deeppink">Remove reservation</button>
+            </form>
+        </ul>
+        {% endfor %}
+    </div>
+    <h1>My apartments: </h1>
+    <div class="side">
+        {% for creation in creations %}
+        <ul>
+            <a href="/apartment/{{ creations.id }}">
+                Apartment address: {{ creation.address }}</a> <br>
+                Apartment name: {{ creation.name }} <br>
+                Apartment description: {{ creation.description }} <br>
+                Price: <b> {{ creation.price }} $ </b>
+            <form method="post" action="/apartment/delete_apart/{{ creation.id }}">
+                <button type="submit" class="smallButton" onclick="return confirm('Are you sure?');">Delete</button>
+                <button class="smallButton" onclick="location.href='/apartment/{{ creation.id }}/edit'" type="button" > Edit </button>
+            </form>
+        </ul>
+        {% endfor %}
+    </div>
+</div>
+
+
+
 {% endblock %}
