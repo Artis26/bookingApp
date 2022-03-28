@@ -4,17 +4,15 @@ namespace App\Models;
 class ApartmentReview {
     private int $rating;
     private int $userID;
-    private string $userName;
     private int $apartmentID;
     private string $text;
-    private string $createdAt;
+    private ?string $createdAt;
     private ?int $id;
 
-    public function __construct(int $rating, int $userID, string $userName, int $apartmentID, string $text, string $createdAt,
+    public function __construct(int $rating, int $userID, int $apartmentID, string $text, ?string $createdAt = null,
                                 ?int $id = null) {
         $this->rating = $rating;
         $this->userID = $userID;
-        $this->userName = $userName;
         $this->apartmentID = $apartmentID;
         $this->text = $text;
         $this->createdAt = $createdAt;
@@ -27,10 +25,6 @@ class ApartmentReview {
 
     public function getUserID(): int {
         return $this->userID;
-    }
-
-    public function getUserName(): string {
-        return $this->userName;
     }
 
     public function getApartmentID(): int {
@@ -49,3 +43,4 @@ class ApartmentReview {
         return $this->id;
     }
 }
+

@@ -22,7 +22,7 @@ Birthday: {{ user.birthday }}
     <div class="side">
         {% for creation in creations %}
         <ul>
-            <a href="/apartment/{{ creations.id }}">
+            <a href="/apartment/{{ creation.id }}">
                 Apartment address: {{ creation.address }}</a> <br>
                 Apartment name: {{ creation.name }} <br>
                 Apartment description: {{ creation.description }} <br>

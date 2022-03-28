@@ -2,54 +2,27 @@
 
 namespace App\Controllers;
 use App\Database;
-use App\Models\Apartment;
-use App\Models\UserProfile;
 use App\Redirect;
+use App\Services\Users\Index\IndexUsersRequest;
+use App\Services\Users\Index\IndexUsersServices;
+use App\Services\Users\SignIn\SignInUsersRequest;
+use App\Services\Users\SignIn\SignInUsersServices;
+use App\Services\Users\Signup\CreateUserRequest;
+use App\Services\Users\Signup\SignupUsersRequest;
+use App\Services\Users\Signup\SignupUsersServices;
+
 use App\View;
-use PDO;
 
 class UsersController {
 
         public function index(): View {
-            $new = Database::connection()->prepare('SELECT * FROM user_profiles WHERE user_id = ?');
-            $new->execute([$_SESSION['user_id']]);
-
-            while ($row = $new->fetch(PDO::FETCH_ASSOC)) {
-                $user = new UserProfile(
-                    $row['name'],
-                    $row['surname'],
-                    $row['birthday'],
-                    $row['user_id']
-                );
-            }
-
-            $stmt = Database::connection()->prepare('SELECT apartment_reservations.id, total_price, name, apartment_id, reserved_from, reserved_till
-FROM apartment_reservations JOIN apartments ON (apartment_id = apartments.id) WHERE reserver_id = ?');
-            $stmt->execute([$_SESSION['user_id']]);
-
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    $reservations[] = $row;
-            }
-
-            $new = Database::connection()->prepare('SELECT * FROM apartments WHERE creator_id = ?');
-            $new->execute([$_SESSION['user_id']]);
-
-            while ($row = $new->fetch(PDO::FETCH_ASSOC)) {
-                $creations[] = new Apartment(
-                        $row['address'],
-                        $row['name'],
-                        $row['description'],
-                        $row['available_from'],
-                        $row['price'],
-                        $row['creator_id'],
-                        $row['id']
-                    );
-            }
+            $service = new IndexUsersServices();
+            $response = $service->execute(new IndexUsersRequest($_SESSION['user_id']));
 
             return new View('Users/index.html', [
-                'user' => $user,
-                'reservations' => $reservations,
-                'creations' => $creations
+                'user' => $response->getUser(),
+                'reservations' => $response->getReservations(),
+                'creations' => $response->getApartments()
             ]);
         }
 
@@ -78,31 +51,17 @@ FROM apartment_reservations JOIN apartments ON (apartment_id = apartments.id) WH
             $pwd = $_POST['pwd'];
             $pwdRepeat = $_POST['pwd_repeat'];
 
-            $new = Database::connection()->prepare('INSERT INTO users (email, pwd) VALUES (?, ?)');
             if ($pwd !== $pwdRepeat) return new Redirect('articles/x');
 
-            $pwd = password_hash($pwd, PASSWORD_DEFAULT);
-            $new->execute([$email, $pwd]);
-
-            $new = Database::connection()->prepare('SELECT id FROM users WHERE email = ?');
-            $new->execute([$email]);
-
-            while ($row = $new->fetch(PDO::FETCH_ASSOC)) {
-                $val = $row;
-            }
-            $id = $val['id'];
-            $_SESSION['user_id'] = $id;
+            $service = new SignupUsersServices();
+            $_SESSION['user_id'] = $service->execute(new SignupUsersRequest($email, $pwd));
 
             $userID = $_SESSION['user_id'];
             $name = $_POST['name'];
             $surname = $_POST['surname'];
             $birthday = $_POST['birthday'];
 
-            $new = Database::connection()->prepare('INSERT INTO user_profiles (user_id, name, surname, birthday) 
-VALUES (?, ?, ?, ?)');
-            $new->execute([$userID, $name, $surname, $birthday]);
-
-            $_SESSION['user_name'] = $name;
+            $_SESSION['user_name'] = $service->createUserProfile(new CreateUserRequest($userID, $name, $surname, $birthday));
             return new Redirect('/apartments');
         }
 
@@ -113,15 +72,12 @@ VALUES (?, ?, ?, ?)');
     public function signIn(): Redirect {
         $email = $_POST['email'];
         $pwd = $_POST['pwd'];
-        $new = Database::connection()->prepare('SELECT pwd, id FROM users WHERE email = ?');
-        $new->execute([$email]);
 
-        while ($row = $new->fetch(PDO::FETCH_ASSOC)) {
-            $val = $row;
-        }
-        $id = $val['id'];
+        $service = new SignInUsersServices();
+        $userIdAndPwd = $service->execute(new SignInUsersRequest($email, $pwd));
 
-        $checkPwd = password_verify($pwd, $val['pwd']);
+        $id = $userIdAndPwd['id'];
+        $checkPwd = password_verify($pwd, $userIdAndPwd['pwd']);
 
         if ($checkPwd == false) {
             header("location: ../index.php?error=usernotfound");
@@ -129,15 +85,7 @@ VALUES (?, ?, ?, ?)');
         }
 
         $_SESSION['user_id'] = $id;
-
-        $new = Database::connection()->prepare('SELECT name FROM user_profiles WHERE user_id = ?');
-        $new->execute([$id]);
-
-        while ($row = $new->fetch(PDO::FETCH_ASSOC)) {
-             $name = $row['name'];
-        }
-
-        $_SESSION['user_name'] = $name;
+        $_SESSION['user_name'] = $service->getUserName($id);
         return new Redirect('/apartments');
     }
 
