@@ -22,7 +22,6 @@ class  Database {
                 die;
             }
         }
-
         return self::$connection;
     }
 }
