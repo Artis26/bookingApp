@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Database;
-use App\Models\Apartment;
 use App\Redirect;
 use App\Services\Apartments\Delete\DeleteApartmentRequest;
 use App\Services\Apartments\Delete\DeleteApartmentServices;
@@ -21,8 +19,6 @@ use App\Services\Apartments\Store\StoreApartmentServices;
 use App\Services\Apartments\Update\UpdateApartmentRequest;
 use App\Services\Apartments\Update\UpdateApartmentServices;
 use App\View;
-use Carbon\CarbonPeriod;
-use PDO;
 
 class ApartmentController {
 

@@ -9,4 +9,6 @@ interface ApartmentRepository {
     public function remove(int $reservationId): void;
     public function update(string $address, string $name, string $description, float $price, int $apartmentId): void;
     public function edit(int $apartmentId): Apartment;
+    public function getById(int $apartmentId): Apartment;
+    public function getReviewsById(int $apartmentId): array;
 }

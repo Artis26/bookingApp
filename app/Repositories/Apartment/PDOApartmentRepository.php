@@ -4,6 +4,7 @@ namespace App\Repositories\Apartment;
 
 use App\Database;
 use App\Models\Apartment;
+use App\Models\ApartmentReviewFull;
 use PDO;
 
 class PDOApartmentRepository implements ApartmentRepository {
@@ -47,5 +48,40 @@ class PDOApartmentRepository implements ApartmentRepository {
             );
         }
         return $apartmentInfo;
+    }
+
+    public function getById(int $apartmentId): Apartment {
+        $query = Database::connection()->prepare('SELECT * FROM apartments where id = ?');
+        $query->execute([$apartmentId]);
+        while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $apartment = new Apartment(
+                $row['address'],
+                $row['name'],
+                $row['description'],
+                $row['available_from'],
+                $row['price'],
+                $row['creator_id'],
+                $row['id']
+            );
+        }
+        return $apartment;
+    }
+
+    public function getReviewsById(int $apartmentId): array {
+        $reviews = [];
+        $query = Database::connection()->prepare('SELECT apartment_reviews.*, user_profiles.name FROM apartment_reviews JOIN user_profiles ON (apartment_reviews.user_id = user_profiles.user_id) WHERE apartment_id = ?');
+        $query->execute([$apartmentId]);
+        while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $reviews[] = new ApartmentReviewFull(
+                $row['rating'],
+                $row['user_id'],
+                $row['name'],
+                $row['apartment_id'],
+                $row['text'],
+                $row['created_at'],
+                $row['id']
+            );
+        }
+        return $reviews;
     }
 }
